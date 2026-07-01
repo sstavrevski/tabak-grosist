@@ -1,0 +1,54 @@
+---
+const milestones = [
+  {
+    date: "1991",
+    title: "Основање на Гросист ДООЕЛ Битола",
+    text: "Компанијата започнува како прва приватна дистрибутерска компанија за цигари во Македонија, со јасна ориентација кон професионална теренска продажба.",
+  },
+  {
+    date: "Доцни 1990-ти",
+    title: "Проширување на магацинската мрежа",
+    text: "Магацини во Охрид, Струга, Кичево, Дебар, Ресен и Струмица. Компанијата се позиционира како втор најсилен продавач на цигари во Македонија по Тутун-Скопје.",
+  },
+  {
+    date: "1999",
+    title: "Табак Гросист и овластено застапување",
+    text: "Се основа „Табак Гросист“ и се зацврстува овластената дистрибуција на Филип Морис и Тутунски комбинат Прилеп за југо-западна Македонија.",
+  },
+  {
+    date: "2006",
+    title:
+      'Дистрибуција за <span class="brand-mark" translate="no"><span class="bm-a">A</span><span class="bm-1">1</span></span>',
+    text: "Компанијата станува официјален дистрибутер на A1, телекомуникациски провајдер, за југо-западна Македонија. Со ова мрежата се прошири надвор од тутунските производи и ја потврди довербата на водечките брендови.",
+  },
+  {
+    date: "Денес",
+    title: "Директна регионална дистрибуција",
+    text: "Директна достава, проширена програма на производи и регионално присуство изградено со децении доверба.",
+  },
+];
+---
+
+<section id="history" class="textured" aria-labelledby="history-title">
+  <div class="section-inner">
+    <div class="section-heading">
+      <h2 id="history-title" data-reveal>Нашиот Историјат</h2>
+      <div class="ornament-rule" aria-hidden="true">◆</div>
+    </div>
+    <div class="timeline">
+      <span class="timeline-progress" aria-hidden="true"></span>
+      {
+        milestones.map((m) => (
+          <article class="timeline-item" data-timeline>
+            <span class="timeline-dot" aria-hidden="true" />
+            <div class="timeline-card glass-card">
+              <span class="timeline-date">{m.date}</span>
+              <h3 set:html={m.title} />
+              <p set:html={m.text} />
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,52 @@
+---
+// Зошто Гросист — предности (убедлива копија за идни партнери)
+const features = [
+  {
+    icon: `<circle cx="12" cy="9" r="5.5"></circle><path d="M8.5 13.8 7 21l5-2.7 5 2.7-1.5-7.2"></path>`,
+    title: '<span class="stat-figure">35</span> години искуство',
+    text: "Од 1991 година до денес, без ниту еден ден прекин на теренот. Искуство што за вашиот бренд значи стабилност, доследност и сигурен пласман.",
+  },
+  {
+    icon: `<path d="M3 7h11v9H3z"></path><path d="M14 10h4l3 3v3h-7z"></path><circle cx="7.5" cy="18" r="1.6"></circle><circle cx="17.5" cy="18" r="1.6"></circle>`,
+    title: "Директна теренска достава",
+    text: "Сопствени возила и посветени теренски тимови што го носат производот директно до секој продажен објект, без посредници и без задоцнувања.",
+  },
+  {
+    icon: `<rect x="3" y="6" width="18" height="13" rx="1.5"></rect><path d="M3 10.5h18"></path><path d="M6.5 15.5h4"></path>`,
+    title: "Партнерски услови",
+    text: "Односи градени со децении доверба значат флексибилно плаќање и услови скроени точно според вашиот бизнис.",
+  },
+  {
+    icon: `<circle cx="12" cy="12" r="2.6"></circle><circle cx="5" cy="6" r="1.6"></circle><circle cx="19" cy="6" r="1.6"></circle><circle cx="5" cy="18" r="1.6"></circle><circle cx="19" cy="18" r="1.6"></circle><path d="M10.2 10.4 6.2 7M13.8 10.4 17.8 7M10.2 13.6 6.2 17M13.8 13.6 17.8 17"></path>`,
+    title: "Една мрежа за цел регион",
+    text: "Еден партнер за целата југо-западна Македонија. Вашиот бренд застапен со ист висок стандард во секој град и секое продажно место.",
+  },
+];
+---
+
+<section id="why" class="textured" aria-labelledby="why-title">
+  <div class="section-inner">
+    <div class="section-heading">
+      <h2 id="why-title" data-reveal>Зошто Табак Гросист?</h2>
+      <div class="ornament-rule" aria-hidden="true">◆</div>
+    </div>
+    <div class="feature-list">
+      {
+        features.map((f, i) => (
+          <article class="feature-row" data-reveal>
+            <span class="feature-number" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" set:html={f.icon} />
+            </div>
+            <div class="feature-content">
+              <h3 set:html={f.title} />
+              <p>{f.text}</p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>

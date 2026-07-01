@@ -1,0 +1,248 @@
+---
+// Контакт — станете партнер
+const details = [
+  {
+    label: "Локација",
+    value: "Битола, Македонија",
+    icon: `<path d="M12 21s7-5.5 7-12a7 7 0 0 0-14 0c0 6.5 7 12 7 12z"></path><circle cx="12" cy="9" r="2"></circle>`,
+  },
+  {
+    label: "Покриеност",
+    value: "Југо-западна Македонија",
+    icon: `<circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3c3 3 3 15 0 18"></path><path d="M12 3c-3 3-3 15 0 18"></path>`,
+  },
+  {
+    label: "Работно време",
+    value: "Понеделник - Петок, 07:00 - 15:00",
+    icon: `<circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path>`,
+  },
+];
+---
+
+<section id="contact" class="textured" aria-labelledby="contact-title">
+  <div class="section-inner">
+    <div class="section-heading">
+      <h2 id="contact-title" data-reveal>Станете Наш Партнер</h2>
+      <div class="ornament-rule" aria-hidden="true">◆</div>
+    </div>
+
+    <div class="contact-layout">
+      <aside class="contact-info" data-reveal>
+        <span class="contact-info-eyebrow">Партнерство</span>
+        <p class="contact-info-lead">Заедно до секој продажен објект во регионот.</p>
+        <p class="contact-info-note">
+          Кажете ни за вашиот производ и пазарот што сакате да го освоите. На
+          секое сериозно барање одговараме лично, со јасен план за дистрибуција.
+        </p>
+        <ul class="contact-detail-list">
+          {
+            details.map((d) => (
+              <li class="contact-detail">
+                <span class="contact-detail-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" set:html={d.icon} />
+                </span>
+                <span class="contact-detail-text">
+                  <span class="contact-detail-label">{d.label}</span>
+                  <span class="contact-detail-value">{d.value}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+
+      <form
+        class="contact-form glass-card"
+        action="https://formspree.io/f/mqevqlqz"
+        method="POST"
+        data-contact-form
+        data-reveal
+      >
+        <input type="hidden" name="_subject" value="Ново барање за соработка — Табак Гросист" />
+        <input
+          type="text"
+          name="_gotcha"
+          tabindex="-1"
+          autocomplete="off"
+          aria-hidden="true"
+          style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;"
+        />
+        <div class="form-grid">
+          <div class="field">
+            <label for="name">Име и презиме</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              placeholder="Вашето име"
+              maxlength="80"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="company">Компанија <span class="field-optional">(опционално)</span></label>
+            <input
+              id="company"
+              name="company"
+              type="text"
+              autocomplete="organization"
+              placeholder="Име на компанија"
+              maxlength="120"
+            />
+          </div>
+          <div class="field">
+            <label for="email">Е-пошта</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="ime@kompanija.mk"
+              maxlength="120"
+              required
+            />
+          </div>
+          <div class="field">
+            <label for="phone">Телефон</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="+389"
+              maxlength="30"
+              data-phone
+              required
+            />
+          </div>
+          <div class="field full">
+            <label for="message">Порака</label>
+            <textarea
+              id="message"
+              name="message"
+              placeholder="Напишете кратко за предлогот за соработка"
+              maxlength="600"
+              data-charcount
+              required></textarea>
+            <span class="field-counter" data-counter aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="submit-row">
+          <button class="lux-button primary" type="submit">Испрати барање</button>
+        </div>
+        <p class="form-consent">
+          Со испраќање на барањето се согласувате со нашата
+          <a href="/politika-za-privatnost">Политика за приватност</a>.
+        </p>
+        <p class="form-error" data-form-error role="alert" hidden></p>
+
+        <div class="form-success" data-form-success hidden>
+          <span class="form-success-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M5 13l4 4L19 7" fill="none" stroke="currentColor"></path>
+            </svg>
+          </span>
+          <h3>Благодариме, барањето е испратено</h3>
+          <p>Ќе ве контактираме во најкус можен рок.</p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  function initContactForm() {
+    document
+      .querySelectorAll<HTMLTextAreaElement>("[data-charcount]")
+      .forEach((area) => {
+        if (area.dataset.bound) return;
+        area.dataset.bound = "1";
+        const max = area.getAttribute("maxlength") || "0";
+        const out = area
+          .closest(".field")
+          ?.querySelector<HTMLElement>("[data-counter]");
+        const update = () => {
+          if (!out) return;
+          const len = area.value.length;
+          out.textContent = `${len} / ${max}`;
+          out.classList.toggle("is-visible", len >= Number(max) - 100);
+        };
+        area.addEventListener("input", update);
+        update();
+      });
+
+    document
+      .querySelectorAll<HTMLInputElement>("[data-phone]")
+      .forEach((phone) => {
+        if (phone.dataset.bound) return;
+        phone.dataset.bound = "1";
+        phone.addEventListener("input", () => {
+          const cleaned = phone.value.replace(/[^\d+\s()\-]/g, "");
+          if (cleaned !== phone.value) phone.value = cleaned;
+        });
+      });
+
+    document
+      .querySelectorAll<HTMLFormElement>("[data-contact-form]")
+      .forEach((form) => {
+        if (form.dataset.bound) return;
+        form.dataset.bound = "1";
+        const errorEl = form.querySelector<HTMLElement>("[data-form-error]");
+        const success = form.querySelector<HTMLElement>("[data-form-success]");
+        const grid = form.querySelector<HTMLElement>(".form-grid");
+        const row = form.querySelector<HTMLElement>(".submit-row");
+        const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+          }
+          if (errorEl) errorEl.hidden = true;
+          const label = btn ? btn.textContent : "";
+          if (btn) {
+            btn.disabled = true;
+            btn.textContent = "Се испраќа…";
+          }
+          try {
+            const res = await fetch(form.action, {
+              method: "POST",
+              body: new FormData(form),
+              headers: { Accept: "application/json" },
+            });
+            if (res.ok) {
+              if (grid) grid.hidden = true;
+              if (row) row.hidden = true;
+              if (success) success.hidden = false;
+              form.reset();
+            } else {
+              const data = await res.json().catch(() => null);
+              if (errorEl) {
+                errorEl.textContent =
+                  data && data.errors
+                    ? data.errors.map((x: any) => x.message).join(" ")
+                    : "Нешто тргна наопаку. Обидете се повторно.";
+                errorEl.hidden = false;
+              }
+            }
+          } catch {
+            if (errorEl) {
+              errorEl.textContent =
+                "Нема врска со серверот. Проверете го интернетот и обидете се повторно.";
+              errorEl.hidden = false;
+            }
+          } finally {
+            if (btn) {
+              btn.disabled = false;
+              btn.textContent = label;
+            }
+          }
+        });
+      });
+  }
+  initContactForm();
+  document.addEventListener("astro:after-swap", initContactForm);
+</script>

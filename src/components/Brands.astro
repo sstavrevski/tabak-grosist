@@ -1,0 +1,47 @@
+---
+// Брендови — бесконечен маркуи на логоа на брендови што ги дистрибуираме
+const brands = [
+  { name: "A1", src: "/brands/a1.png" },
+  { name: "Belaprom", src: "/brands/belaprom.webp" },
+  { name: "Cricket", src: "/brands/cricket.png" },
+  { name: "Elitte", src: "/brands/elitte.png" },
+  { name: "Elvan", src: "/brands/elvan.png" },
+  { name: "Freegells", src: "/brands/freegells.png" },
+  { name: "KT International", src: "/brands/kt.png" },
+  { name: "King", src: "/brands/king.png", light: true },
+  { name: "Today", src: "/brands/today.png" },
+  { name: "Trokadero", src: "/brands/trokadero.png" },
+];
+// Дуплираме за беспрекорно вртење на лентата.
+const loop = [...brands, ...brands];
+---
+
+<section id="brands" aria-labelledby="brands-title">
+  <div class="section-inner brands-head" data-reveal>
+    <span class="brands-eyebrow">Асортиман</span>
+    <h2 id="brands-title" class="brands-title">
+      Брендови што ги дистрибуираме
+    </h2>
+    <p class="brands-sub">
+      Водечки <span class="brands-sub-accent">домашни и меѓународни</span> имиња,
+      доставени до секој продажен објект во регионот.
+    </p>
+  </div>
+
+  <div class="brand-marquee" data-reveal>
+    <ul class="brand-track" aria-label="Брендови што ги дистрибуираме">
+      {
+        loop.map((b, i) => (
+          <li class="brand-item" aria-hidden={i >= brands.length ? "true" : null}>
+            <img
+              class:list={[b.light && "brand-logo--light"]}
+              src={b.src}
+              alt={i >= brands.length ? "" : b.name}
+              decoding="async"
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

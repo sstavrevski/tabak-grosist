@@ -1,0 +1,79 @@
+---
+const footerLinks = [
+  { href: "/#about", label: "За нас" },
+  { href: "/#history", label: "Историјат" },
+  { href: "/#coverage", label: "Покриеност" },
+  { href: "/#why", label: "Зошто Табак Гросист" },
+  { href: "/#brands", label: "Брендови" },
+  { href: "/#contact", label: "Контакт" },
+];
+
+const legalLinks = [
+  { href: "/politika-za-privatnost", label: "Политика за приватност" },
+  { href: "/uslovi", label: "Услови за користење" },
+];
+
+const contactInfo = [
+  { label: "Локација", value: "Битола, Македонија" },
+  { label: "Покриеност", value: "Југо-западна Македонија" },
+  { label: "Работно време", value: "Понеделник - Петок, 07:00 - 15:00" },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="footer-logo" href="/#hero" aria-label="Табак Гросист почетна">
+          <span class="footer-emblem" aria-hidden="true">
+            <img src="/assets/tabak-grosist-logo.png" alt="" />
+          </span>
+          <span class="footer-wordmark">
+            <span class="footer-name" translate="no">ТАБАК ГРОСИСТ</span>
+            <span class="footer-sub">ДООЕЛ Битола</span>
+          </span>
+        </a>
+        <p class="footer-tagline">
+          Дистрибутивна традиција од 1991 година. Сигурен партнер за пласман на
+          реномирани брендови низ југо-западна Македонија.
+        </p>
+      </div>
+
+      <nav class="footer-col" aria-label="Навигација во подножје">
+        <h2 class="footer-col-title">Навигација</h2>
+        <ul class="footer-links">
+          {footerLinks.map((link) => (
+            <li>
+              <a href={link.href}>{link.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="footer-col">
+        <h2 class="footer-col-title">Контакт</h2>
+        <ul class="footer-contact">
+          {contactInfo.map((item) => (
+            <li>
+              <span class="footer-contact-label">{item.label}</span>
+              <span class="footer-contact-value">{item.value}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="copyright">
+        © {year} Табак Гросист ДООЕЛ Битола. Сите права задржани.
+      </p>
+      <nav class="footer-legal" aria-label="Правни информации">
+        {legalLinks.map((link) => (
+          <a href={link.href}>{link.label}</a>
+        ))}
+      </nav>
+    </div>
+  </div>
+</footer>

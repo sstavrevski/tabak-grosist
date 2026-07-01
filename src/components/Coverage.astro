@@ -1,0 +1,175 @@
+---
+// Coverage — real North Macedonia municipal map (assets/macedonia.svg).
+// Cities projected from lon/lat via the file's mapsvg:geoViewBox.
+import mkRaw from "../../assets/macedonia.svg?raw";
+
+const W = 774.91754;
+const H = 600.5036;
+const lonL = 20.455561;
+const latT = 42.338669;
+const lonR = 23.006302;
+const latB = 40.855173;
+const project = (lon: number, lat: number) => ({
+  x: ((lon - lonL) / (lonR - lonL)) * W,
+  y: ((latT - lat) / (latT - latB)) * H,
+});
+
+const paths = [...mkRaw.matchAll(/<path\b([\s\S]*?)\/>/g)]
+  .map((m) => {
+    const attrs = m[1];
+    const d = (attrs.match(/\bd="([^"]+)"/) || [])[1];
+    const title = ((attrs.match(/\btitle="([^"]*)"/) || [])[1] || "").trim();
+    return { d, title };
+  })
+  .filter((p) => p.d);
+
+// Each covered municipality is assigned to one of the four legend clusters,
+// so hovering a legend row can light up its whole cluster on the map.
+const regionByMuni: Record<string, number> = {
+  Bitola: 1, Resen: 1, Mogila: 1, Novaci: 1, "Demir Hisar": 1,
+  Prilep: 2, Kruševo: 2, Dolneni: 2, Krivogaštani: 2,
+  Ohrid: 3, Struga: 3, Debarca: 3, Vevčani: 3,
+  Kičevo: 4, Debar: 4, "Centar Župa": 4, Plasnica: 4, "Makedonski Brod": 4,
+  Drugovo: 4, Oslomej: 4, Zajas: 4, Vraneštica: 4, "Mavrovo i Rostuša": 4,
+};
+const lakeNames = new Set(["Lake Ohrid", "Lake Dojran"]);
+
+const munis = paths.map((p) => ({
+  d: p.d,
+  region: regionByMuni[p.title] ?? null,
+  kind: lakeNames.has(p.title)
+    ? "lake"
+    : regionByMuni[p.title]
+      ? "covered"
+      : "base",
+}));
+
+const cityData = [
+  { name: "Битола", region: 1, lon: 21.3292, lat: 41.0297, dx: 11, dy: 4, anchor: "start" },
+  { name: "Ресен", region: 1, lon: 21.0119, lat: 41.09, dx: 11, dy: 4, anchor: "start" },
+  { name: "Прилеп", region: 2, lon: 21.5544, lat: 41.3464, dx: 11, dy: 4, anchor: "start" },
+  { name: "Крушево", region: 2, lon: 21.2494, lat: 41.3692, dx: 0, dy: -11, anchor: "middle" },
+  { name: "Охрид", region: 3, lon: 20.8019, lat: 41.1172, dx: 0, dy: 20, anchor: "middle" },
+  { name: "Струга", region: 3, lon: 20.6781, lat: 41.1775, dx: 0, dy: -11, anchor: "middle" },
+  { name: "Кичево", region: 4, lon: 20.9628, lat: 41.5142, dx: 11, dy: 4, anchor: "start" },
+  { name: "Дебар", region: 4, lon: 20.5286, lat: 41.5242, dx: 11, dy: 4, anchor: "start" },
+];
+const cities = cityData.map((c) => ({ ...c, ...project(c.lon, c.lat) }));
+const skopje = project(21.43, 42.0);
+
+// Lake Prespa is absent from the municipal source. This is the real North
+// Macedonian portion of the lake, built from authoritative OpenStreetMap data:
+// the Lake Prespa shoreline (OSM relation 2905510) and the North Macedonia
+// country border (OSM relation 53293) were both projected through THIS map's
+// own geoViewBox (the same equirectangular transform macedonia.svg uses for the
+// municipalities and the other lakes), then geometrically intersected so only
+// the water inside the national border remains, and simplified. One projection,
+// one source of truth, no manual paths.
+const prespaD =
+  "M 201.2,600.7 L 200.6,595.6 L 193.4,585.1 L 194.9,578 L 188.9,571.4 L 188.5,563.9 L 186,559.4 L 185.5,555.7 L 181.6,552.2 L 179.5,547.4 L 177.7,545.2 L 173.4,543.9 L 168.1,543.8 L 153.5,538.5 L 149.2,539.6 L 146.7,541.3 L 145,544.6 L 140.5,549.7 L 138.9,554 L 135.6,557 L 134.5,559.8 L 136.5,563.8 L 140,566.7 L 144.2,568.4 L 148.6,567.7 L 155.1,574 L 163.4,577 L 160.5,579.6 L 161.3,581.7 L 160.6,585.4 L 158.6,586.5 L 159.2,601.5 L 201.2,601.1 Z";
+
+const regions = ["Битола, Ресен", "Прилеп, Крушево", "Охрид, Струга", "Кичево, Дебар"];
+---
+
+<section id="coverage" class="textured" aria-labelledby="coverage-title">
+  <div class="section-inner">
+    <div class="section-heading">
+      <h2 id="coverage-title" data-reveal>Покриеност на Пазар</h2>
+      <div class="ornament-rule" aria-hidden="true">◆</div>
+    </div>
+
+    <div class="coverage-grid">
+      <div class="coverage-map" data-reveal>
+        <svg
+          class="mk-map"
+          viewBox="0 0 774.91754 600.5036"
+          role="img"
+          aria-label="Мапа на Северна Македонија со покриеноста во југо-западниот регион"
+        >
+          <defs>
+            <radialGradient id="covGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="rgba(201,162,86,0.16)"></stop>
+              <stop offset="100%" stop-color="rgba(201,162,86,0)"></stop>
+            </radialGradient>
+            {/* Union of the municipality shapes = the rendered country. Clipping
+                the lake to this means it can never cross a border line, because
+                this is the exact geometry that draws those borders. */}
+            <clipPath id="muniClip" clipPathUnits="userSpaceOnUse">
+              {munis.map((m) => <path d={m.d} />)}
+            </clipPath>
+          </defs>
+
+          <ellipse cx="150" cy="445" rx="170" ry="150" fill="url(#covGlow)"
+          ></ellipse>
+
+          <g class="mk-municipalities" aria-hidden="true">
+            {munis.map((m) => (
+              <path class={`mk-muni mk-${m.kind}`} d={m.d} data-region={m.region} />
+            ))}
+          </g>
+
+          <path
+            class="mk-muni mk-lake"
+            d={prespaD}
+            clip-path="url(#muniClip)"
+            aria-hidden="true"></path>
+
+          {/* Border lines re-drawn on top so the lake never hides or breaks
+              them — the boundaries stay exactly as macedonia.svg defines them. */}
+          <g class="mk-edges" aria-hidden="true">
+            {munis.map((m) => (
+              <path class={`mk-edge mk-edge-${m.kind}`} d={m.d} data-region={m.region} />
+            ))}
+          </g>
+
+          <g class="mk-ref" aria-hidden="true">
+            <circle cx={skopje.x} cy={skopje.y} r="4.5"></circle>
+            <text x={skopje.x + 10} y={skopje.y + 4}>Скопје</text>
+          </g>
+
+          {
+            cities.map((c) => (
+              <g class="mk-pin" data-region={c.region}>
+                <circle class="mk-pin-glow" cx={c.x} cy={c.y} r="9.5" />
+                <circle class="mk-pin-ring" cx={c.x} cy={c.y} r="5.4" />
+                <circle class="mk-pin-core" cx={c.x} cy={c.y} r="2.4" />
+                <text
+                  class="mk-label"
+                  x={c.x + c.dx}
+                  y={c.y + c.dy}
+                  text-anchor={c.anchor}
+                >
+                  {c.name}
+                </text>
+              </g>
+            ))
+          }
+        </svg>
+      </div>
+
+      <div class="coverage-panel" data-reveal>
+        <p class="coverage-kicker">Региони на достава</p>
+        <p class="coverage-lead">
+          Директна достава низ <span class="lead-accent">четири региони</span><br
+            class="lead-break"
+            aria-hidden="true"
+          /> во <span class="nowrap">југо-западна Македонија</span>.
+        </p>
+        <ul class="coverage-regions" aria-label="Региони на покриеност">
+          {
+            regions.map((region, index) => (
+              <li class="region-row" data-region={index + 1}>
+                <span class="region-num" aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3 class="region-city">
+                  {region} <span class="region-extra">и околина</span>
+                </h3>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

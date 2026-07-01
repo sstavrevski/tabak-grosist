@@ -1,0 +1,62 @@
+---
+// Root-relative anchors so the nav works from subpages (e.g. legal pages) too.
+const navItems = [
+  { href: "/#about", label: "За нас" },
+  { href: "/#history", label: "Историјат" },
+  { href: "/#coverage", label: "Покриеност" },
+  { href: "/#brands", label: "Брендови" },
+];
+// Desktop nav surfaces the contact section as a regular link labelled Соработка.
+const desktopItems = [...navItems, { href: "/#contact", label: "Соработка" }];
+// Mobile menu also lists Контакт (alongside the Соработка button below) so it stays full.
+const mobileItems = [...navItems, { href: "/#contact", label: "Контакт" }];
+---
+
+<header class="site-header" data-header>
+  <div class="nav-inner">
+    <a class="logo" href="/#hero" aria-label="Табак Гросист почетна" data-protected-logo>
+      <span class="logo-emblem" aria-hidden="true"></span>
+      <span class="logo-wordmark" translate="no">
+        <span class="logo-name">ТАБАК ГРОСИСТ</span>
+        <span class="logo-subtitle">ДООЕЛ БИТОЛА</span>
+      </span>
+    </a>
+
+    <div class="nav-cluster">
+      <nav class="nav-links" aria-label="Главна навигација">
+        {desktopItems.map((item) => (
+          <a class="nav-link" href={item.href}>{item.label}</a>
+        ))}
+      </nav>
+
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        aria-label="Отвори мени"
+      >
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+  <div class="mobile-menu-inner">
+    <nav aria-label="Мобилна навигација">
+      {mobileItems.map((item) => (
+        <a href={item.href}>{item.label}</a>
+      ))}
+    </nav>
+    <div class="mobile-menu-foot">
+      <a class="lux-button primary menu-cta" href="/#contact">Соработка</a>
+      <p class="mobile-menu-meta">
+        <span>Битола, Северна Македонија</span>
+        <span>Понеделник - Петок, 07:00 - 15:00</span>
+      </p>
+    </div>
+  </div>
+</div>

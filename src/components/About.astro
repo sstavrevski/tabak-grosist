@@ -1,0 +1,62 @@
+---
+const credentials = [
+  { strong: "Прва приватна", rest: " дистрибуција на цигари во Македонија" },
+  { strong: "Доверба од реномирани брендови", rest: " низ повеќе индустрии" },
+  { strong: "Дистрибутивна традиција", rest: " градена од 1970 година" },
+];
+---
+
+<section id="about" class="textured" aria-labelledby="about-title">
+  <div class="section-inner">
+    <div class="section-heading">
+      <span class="about-seal" aria-hidden="true">
+        <span class="about-emblem"></span>
+      </span>
+      <h2 id="about-title" data-reveal>Традиција и Доверба</h2>
+      <div class="ornament-rule" aria-hidden="true">◆</div>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-copy">
+        <p class="about-lead" data-about-copy>
+          Од 1991 година, „Гросист“ е првата приватна компанија за дистрибуција
+          на цигари во Македонија и број 1 потрошувач на цигари на Македонија
+          Табак Скопје. Изградена е на искуство, дисциплина и поштеност.
+        </p>
+        <p data-about-copy>
+          Основачот Костадин Ставревски од 1971 година беше претставник за
+          Македонија на „Фабрика Дувана“ Сараево, за цигарите Marlboro
+          (Сараевско), Bond, Drina (Сараевска) и други. Започна со еден магацин
+          во Битола и за кратко „Гросист“ стана втор најголем дистрибутер на
+          цигари во земјата после Тутун Скопје. Во 1999 фирмата стана овластен
+          дистрибутер на Филип Морис и Т.К.П, а во 2006 и на А1 за цела
+          југо-западна Македонија.
+        </p>
+        <p data-about-copy>
+          Денес, под водство на Петар Ставревски, продолжуваме со истиот
+          принцип: директна теренска дистрибуција, редовна посета на продажните
+          објекти и деловни односи градени со децении доверба.
+        </p>
+      </div>
+
+      <aside class="about-credentials" aria-label="Акредитиви на компанијата">
+        <p class="credentials-title" data-reveal>Акредитиви</p>
+        <ul class="credentials-list">
+          {
+            credentials.map((c, index) => (
+              <li>
+                <span class="credentials-num">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span class="credentials-text">
+                  <strong>{c.strong}</strong>
+                  {c.rest}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+    </div>
+  </div>
+</section>

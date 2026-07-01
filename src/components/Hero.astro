@@ -1,0 +1,54 @@
+---
+const stats = [
+  { num: "35+", label: "Години искуство" },
+  { num: "100%", label: "Теренска покриеност" },
+  { num: "1991", label: "Основана" },
+];
+---
+
+<section id="hero" aria-labelledby="hero-title">
+  <div class="parallax-layer hero-orb-a" data-parallax="0.18" aria-hidden="true"></div>
+  <div class="parallax-layer hero-orb-b" data-parallax="-0.14" aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <div class="hero-title-wrap">
+      <h1 class="hero-title" id="hero-title">
+        <span class="hero-title-clip">
+          <span class="hero-title-line" translate="no">ТАБАК ГРОСИСТ</span>
+        </span>
+      </h1>
+    </div>
+
+    <p class="hero-subtitle" data-hero-item>
+      Дистрибутивна традиција <br class="hero-subtitle-br" />од над 35 години
+    </p>
+
+    <ul class="hero-stats" data-hero-item>
+      {
+        stats.map((stat) => (
+          <li>
+            <span class="hero-stat-num">{stat.num}</span>
+            <span class="hero-stat-label">{stat.label}</span>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="hero-actions" data-hero-item>
+      <a class="lux-button primary" href="#contact">Соработка</a>
+      <a class="lux-button secondary" href="#about">Дознај повеќе</a>
+    </div>
+  </div>
+
+  <a class="scroll-cue" href="#about" data-hero-item aria-label="Скролај надолу">
+    <span class="scroll-cue-mouse" aria-hidden="true">
+      <span class="scroll-cue-dot"></span>
+    </span>
+    <span class="scroll-cue-arrow" aria-hidden="true">
+      <svg viewBox="0 0 24 28">
+        <path d="M5 7l7 7 7-7" />
+        <path d="M5 14l7 7 7-7" />
+      </svg>
+    </span>
+  </a>
+</section>
