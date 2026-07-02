@@ -10,11 +10,16 @@ gsap.registerPlugin(ScrollTrigger);
 /* Custom eased smooth-scroll — consistent on every browser (Safari's native
    smooth scroll is janky), with an offset so sections clear the fixed header. */
 const scrollToTarget = (target: Element) => {
-  const headerOffset = 84;
+  // Align the section's content wrapper (which starts after the section's
+  // large top padding) just under the fixed header — otherwise we'd land on
+  // the padded section edge and leave a big empty gap before the heading.
+  const headerOffset = 70;
+  const gap = 32;
+  const anchor = target.querySelector(".section-inner") ?? target;
   const startY = window.scrollY;
   const destY = Math.max(
     0,
-    startY + target.getBoundingClientRect().top - headerOffset,
+    startY + anchor.getBoundingClientRect().top - headerOffset - gap,
   );
   const distance = destY - startY;
 
