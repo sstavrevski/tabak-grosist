@@ -316,4 +316,51 @@ if (!prefersReducedMotion) {
       },
     });
   }
+
+  /* ----------------------------------------------------------
+     Reveal safeguards — content must NEVER stay hidden.
+     `gsap.from(..., {opacity:0})` sets opacity 0 immediately and only
+     animates it back when the ScrollTrigger fires. If triggers mis-measure
+     (fonts/images not loaded yet) or the tab is backgrounded during load,
+     an in-view element can get stuck invisible until a refresh. We
+     recalculate on exactly those events, and force-reveal anything that is
+     on screen yet still hidden as a last-resort guarantee.
+     ---------------------------------------------------------- */
+  const revealSelector =
+    "[data-reveal],[data-hero-item],.timeline-card,.credentials-list li,[data-about-copy]";
+
+  const forceRevealOnScreen = () => {
+    gsap.utils.toArray<HTMLElement>(revealSelector).forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      const onScreen = rect.top < window.innerHeight && rect.bottom > 0;
+      if (onScreen && Number(getComputedStyle(el).opacity) < 0.05) {
+        gsap.set(el, { opacity: 1, x: 0, y: 0, clearProps: "transform" });
+      }
+    });
+  };
+
+  const recalcAndGuard = () => {
+    ScrollTrigger.refresh();
+    forceRevealOnScreen();
+  };
+
+  // Images/fonts finishing after first paint is the main cause of bad
+  // trigger positions — re-measure once everything has loaded.
+  window.addEventListener("load", recalcAndGuard);
+  document.fonts?.ready.then(recalcAndGuard);
+  // Back/forward cache restores (Safari) and returning to a backgrounded tab.
+  window.addEventListener("pageshow", (event) => {
+    if ((event as PageTransitionEvent).persisted) recalcAndGuard();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) recalcAndGuard();
+  });
+  // Final hard net well after any entrance animation (~0.9s) would finish:
+  // if the hero intro never advanced (e.g. loaded in a background tab), snap
+  // it to its end state so the hero can never be left blank, then reveal any
+  // other on-screen element still stuck hidden.
+  window.setTimeout(() => {
+    if (tl.progress() === 0) tl.progress(1);
+    forceRevealOnScreen();
+  }, 1500);
 }
