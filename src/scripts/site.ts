@@ -28,15 +28,16 @@ const scrollToTarget = (target: Element) => {
     return;
   }
 
-  const duration = Math.min(1100, Math.max(500, Math.abs(distance) * 0.6));
-  const easeInOutCubic = (t: number) =>
-    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  // Snappy, responsive feel: shorter duration + ease-out (fast start,
+  // gentle finish) instead of a long slow-in/slow-out curve.
+  const duration = Math.min(600, Math.max(300, Math.abs(distance) * 0.35));
+  const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
   let startTime: number | null = null;
   const step = (now: number) => {
     if (startTime === null) startTime = now;
     const progress = Math.min(1, (now - startTime) / duration);
-    window.scrollTo(0, startY + distance * easeInOutCubic(progress));
+    window.scrollTo(0, startY + distance * easeOutCubic(progress));
     if (progress < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);

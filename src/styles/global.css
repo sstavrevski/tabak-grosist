@@ -129,10 +129,11 @@ a {
 
 .site-header.is-scrolled {
   height: 70px;
-  background: rgba(13, 22, 40, 0.95);
+  /* Solid, no backdrop blur — the near-opaque background makes the blur
+     visually negligible while it repaints the full width every scroll frame,
+     which causes noticeable scroll lag on Safari. */
+  background: rgba(13, 22, 40, 0.97);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.32);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 .nav-inner {
