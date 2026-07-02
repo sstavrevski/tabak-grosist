@@ -7,15 +7,40 @@ const prefersReducedMotion = window.matchMedia(
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* Custom eased smooth-scroll — consistent on every browser (Safari's native
+   smooth scroll is janky), with an offset so sections clear the fixed header. */
 const scrollToTarget = (target: Element) => {
-  target.scrollIntoView({ behavior: "smooth" });
+  const headerOffset = 84;
+  const startY = window.scrollY;
+  const destY = Math.max(
+    0,
+    startY + target.getBoundingClientRect().top - headerOffset,
+  );
+  const distance = destY - startY;
+
+  if (prefersReducedMotion || Math.abs(distance) < 2) {
+    window.scrollTo(0, destY);
+    return;
+  }
+
+  const duration = Math.min(1100, Math.max(500, Math.abs(distance) * 0.6));
+  const easeInOutCubic = (t: number) =>
+    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  let startTime: number | null = null;
+  const step = (now: number) => {
+    if (startTime === null) startTime = now;
+    const progress = Math.min(1, (now - startTime) / duration);
+    window.scrollTo(0, startY + distance * easeInOutCubic(progress));
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 };
 
 /* ----------------------------------------------------------
-   Header state + scroll progress
+   Header state
    ---------------------------------------------------------- */
 const header = document.querySelector<HTMLElement>("[data-header]");
-const progress = document.querySelector<HTMLElement>(".scroll-progress");
 
 /* While a click-initiated smooth scroll is in flight we freeze the scroll-spy
    so sections we pass on the way don't flash their active underline. */
@@ -34,12 +59,6 @@ const lockSpy = () => {
 
 const onScroll = () => {
   header?.classList.toggle("is-scrolled", window.scrollY > 24);
-  if (progress) {
-    const maxScroll =
-      document.documentElement.scrollHeight - window.innerHeight;
-    const percent = maxScroll > 0 ? (window.scrollY / maxScroll) * 100 : 0;
-    progress.style.width = `${Math.min(percent, 100)}%`;
-  }
   // Release the lock shortly after the smooth scroll settles (no scroll events).
   if (spyLock) {
     window.clearTimeout(spyReleaseTimer);
@@ -88,18 +107,23 @@ document.addEventListener("keydown", (event) => {
 /* ----------------------------------------------------------
    Smooth in-page anchor navigation
    ---------------------------------------------------------- */
-document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((link) => {
+document.querySelectorAll<HTMLAnchorElement>('a[href*="#"]').forEach((link) => {
   link.addEventListener("click", (event) => {
-    const id = link.getAttribute("href");
-    if (!id || id === "#") return;
+    const href = link.getAttribute("href");
+    if (!href) return;
+    // Support both "#section" and root-relative "/#section" links.
+    const hashIndex = href.indexOf("#");
+    if (hashIndex === -1) return;
+    const hash = href.slice(hashIndex);
+    if (hash === "#") return;
+    const target = document.querySelector(hash);
+    // Section not on this page (e.g. a legal page) — let the browser navigate.
+    if (!target) return;
     event.preventDefault();
     closeMenu();
-    const target = document.querySelector(id);
-    if (target) {
-      lockSpy();
-      setActiveSection(id.slice(1));
-      scrollToTarget(target);
-    }
+    lockSpy();
+    setActiveSection(hash.slice(1));
+    scrollToTarget(target);
   });
 });
 
@@ -109,10 +133,11 @@ document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((link) => {
 const spyTargets = new Map<string, HTMLElement[]>();
 document
   .querySelectorAll<HTMLAnchorElement>(
-    '.nav-link[href^="#"], .mobile-menu nav a[href^="#"]',
+    '.nav-link[href*="#"], .mobile-menu nav a[href*="#"]',
   )
   .forEach((link) => {
-    const id = link.getAttribute("href")?.slice(1);
+    const href = link.getAttribute("href");
+    const id = href?.slice(href.indexOf("#") + 1);
     if (!id) return;
     if (!spyTargets.has(id)) spyTargets.set(id, []);
     spyTargets.get(id)?.push(link);

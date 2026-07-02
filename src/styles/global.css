@@ -42,7 +42,10 @@
    Base
    ============================================================ */
 html {
-  scroll-behavior: smooth;
+  /* Smooth scrolling is handled by a custom eased animation in JS for
+     consistent behaviour across browsers (Safari's native smooth scroll is
+     janky and would double up with programmatic scrolls). */
+  scroll-behavior: auto;
   background: var(--color-bg-primary);
 }
 
@@ -100,26 +103,6 @@ a {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-/* ============================================================
-   Shared chrome — scroll progress + cursor dot
-   ============================================================ */
-.scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 10001;
-  width: 0%;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--color-gold-dark),
-    var(--color-gold-light),
-    var(--color-gold-primary)
-  );
-  box-shadow: 0 0 18px rgba(232, 201, 122, 0.55);
-  transform-origin: left center;
 }
 
 /* ============================================================
@@ -355,6 +338,10 @@ a {
   transition: transform 0.42s var(--ease-lux);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
+  /* Scroll within the panel so content (tall nav + footer) can never spill
+     outside the opaque background — e.g. on short landscape phone screens. */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobile-menu.is-open {
@@ -421,6 +408,32 @@ a {
 
 .mobile-menu-meta span:first-child {
   color: rgba(240, 236, 224, 0.78);
+}
+
+/* Short screens (landscape phones): compact the menu so it fits without the
+   huge top padding and oversized links overflowing. */
+@media (max-height: 560px) {
+  .mobile-menu {
+    padding-top: 84px;
+    padding-bottom: 24px;
+  }
+
+  .mobile-menu nav {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    margin: auto 0;
+    padding: 12px 0;
+    gap: 2px;
+  }
+
+  .mobile-menu nav a {
+    font-size: clamp(1.4rem, 6.5vh, 1.9rem);
+    padding: 8px 24px;
+  }
+
+  .mobile-menu-foot {
+    gap: 16px;
+  }
 }
 
 /* ============================================================
@@ -2265,8 +2278,20 @@ p {
   animation: brand-scroll 38s linear infinite;
 }
 
-.brand-marquee:hover .brand-track {
-  animation-play-state: paused;
+/* Pause only on true hover devices — on touch a tap triggers a sticky
+   :hover that would freeze the marquee. */
+@media (hover: hover) and (pointer: fine) {
+  .brand-marquee:hover .brand-track {
+    animation-play-state: paused;
+  }
+}
+
+/* On touch, ignore taps entirely so the scroll can't be interrupted. */
+@media (hover: none) {
+  .brand-marquee,
+  .brand-track {
+    pointer-events: none;
+  }
 }
 
 @keyframes brand-scroll {
