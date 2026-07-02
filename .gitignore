@@ -16,5 +16,10 @@ pnpm-debug.log*
 .DS_Store
 # local editor / tooling config
 .claude/
+# playwright test artifacts
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
 # large source file not used by the build
 assets/North_Macedonia_location_map.svg

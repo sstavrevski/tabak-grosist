@@ -363,4 +363,34 @@ if (!prefersReducedMotion) {
     if (tl.progress() === 0) tl.progress(1);
     forceRevealOnScreen();
   }, 1500);
+
+  // Scroll-aware net: reveals trigger at "top 85%" and animate over ~0.9s, so
+  // by the time an element is well into view (top above 60% of the viewport)
+  // it must be visible. If one is still hidden there, its trigger never fired
+  // — reveal it. This can't preempt normal entrance animations (which are
+  // already playing by that point) but guarantees nothing stays invisible,
+  // even on fast programmatic jumps.
+  let safetyQueued = false;
+  const scrollSafetyNet = () => {
+    safetyQueued = false;
+    gsap.utils.toArray<HTMLElement>(revealSelector).forEach((el) => {
+      const r = el.getBoundingClientRect();
+      // 0.75 is past every reveal trigger's start (they fire by "top 78-88%"),
+      // so a still-hidden element here has a genuinely failed trigger.
+      const wellInView =
+        r.width > 0 && r.bottom > 0 && r.top < window.innerHeight * 0.75;
+      if (wellInView && Number(getComputedStyle(el).opacity) < 0.05) {
+        gsap.set(el, { opacity: 1, x: 0, y: 0, clearProps: "transform" });
+      }
+    });
+  };
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (safetyQueued) return;
+      safetyQueued = true;
+      requestAnimationFrame(scrollSafetyNet);
+    },
+    { passive: true },
+  );
 }
