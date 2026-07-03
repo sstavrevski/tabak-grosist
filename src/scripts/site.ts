@@ -326,8 +326,12 @@ if (!prefersReducedMotion) {
      recalculate on exactly those events, and force-reveal anything that is
      on screen yet still hidden as a last-resort guarantee.
      ---------------------------------------------------------- */
+  // NOTE: the hero intro elements ([data-hero-item], .hero-title-line, .logo)
+  // are deliberately excluded — they animate via the autoplay hero timeline
+  // and are guaranteed by its `tl.progress(1)` failsafe below. Including them
+  // here would let the scroll net snap them mid-entrance and break the intro.
   const revealSelector =
-    "[data-reveal],[data-hero-item],.timeline-card,.credentials-list li,[data-about-copy]";
+    "[data-reveal],.timeline-card,.credentials-list li,[data-about-copy]";
 
   const forceRevealOnScreen = () => {
     gsap.utils.toArray<HTMLElement>(revealSelector).forEach((el) => {
@@ -364,11 +368,11 @@ if (!prefersReducedMotion) {
     forceRevealOnScreen();
   }, 1500);
 
-  // Scroll-aware net: reveals trigger at "top 85%" and animate over ~0.9s, so
-  // by the time an element is well into view (top above 60% of the viewport)
-  // it must be visible. If one is still hidden there, its trigger never fired
-  // — reveal it. This can't preempt normal entrance animations (which are
-  // already playing by that point) but guarantees nothing stays invisible,
+  // Scroll-aware net: reveals trigger at "top 78-88%" and animate over ~0.9s,
+  // so by the time an element is well into view (top above 75% of the
+  // viewport) it must be visible. If one is still hidden there, its trigger
+  // never fired — reveal it. This can't preempt normal entrance animations
+  // (already playing by that point) but guarantees nothing stays invisible,
   // even on fast programmatic jumps.
   let safetyQueued = false;
   const scrollSafetyNet = () => {

@@ -103,6 +103,39 @@ test.describe("content visibility guarantee", () => {
     await context.close();
   });
 
+  test("scrolling during the hero intro doesn't snap it to the end", async ({
+    page,
+  }) => {
+    // Regression: the reveal safety nets must not touch the hero intro
+    // elements, or an early scroll would jump the entrance straight to its
+    // end state (broken animation).
+    await page.goto("/");
+    await page.waitForTimeout(120);
+    await page.mouse.wheel(0, 60);
+    await page.waitForTimeout(150);
+
+    const opacities = await page.evaluate(() =>
+      [...document.querySelectorAll("[data-hero-item]")].map((e) =>
+        parseFloat(getComputedStyle(e).opacity),
+      ),
+    );
+    // Still mid-entrance — not prematurely completed by the scroll.
+    expect(Math.max(...opacities)).toBeLessThan(1);
+
+    // ...but fully visible once the intro finishes.
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() =>
+            [...document.querySelectorAll("[data-hero-item]")].every(
+              (e) => getComputedStyle(e).opacity === "1",
+            ),
+          ),
+        { timeout: 4000 },
+      )
+      .toBe(true);
+  });
+
   test("no reveal element is left permanently hidden after full load", async ({
     page,
   }) => {
