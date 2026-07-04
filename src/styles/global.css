@@ -128,7 +128,7 @@ a {
 }
 
 .site-header.is-scrolled {
-  height: 70px;
+  height: calc(70px + env(safe-area-inset-top));
   /* Fully opaque + a gold hairline + shadow so it reads as a distinct bar.
      No backdrop blur — that repaints the full width every scroll frame and
      lags Safari; and the header colour nearly matches the page, so without a
@@ -136,6 +136,21 @@ a {
   background: #0b1322;
   border-bottom: 1px solid rgba(201, 162, 86, 0.16);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Extend the bar's fill up behind the notch / Dynamic Island (safe area), and
+   on phones keep it solid at every scroll position so page content can never
+   show through it or in the status-bar strip above it. */
+.site-header {
+  padding-top: env(safe-area-inset-top);
+  height: calc(84px + env(safe-area-inset-top));
+}
+
+@media (max-width: 979px) {
+  .site-header {
+    background: #0b1322;
+    border-bottom: 1px solid rgba(201, 162, 86, 0.14);
+  }
 }
 
 .nav-inner {
@@ -328,8 +343,12 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: clamp(104px, 15vh, 132px) clamp(30px, 8vw, 52px)
-    clamp(36px, 6vh, 56px);
+  /* Full-bleed background (inset:0 + viewport-fit=cover) covers the notch and
+     home-indicator strips; the safe-area insets keep the links/footer clear of
+     them. */
+  padding: calc(clamp(104px, 15vh, 132px) + env(safe-area-inset-top))
+    clamp(30px, 8vw, 52px)
+    calc(clamp(36px, 6vh, 56px) + env(safe-area-inset-bottom));
   background:
     radial-gradient(
       circle at 50% 0%,
