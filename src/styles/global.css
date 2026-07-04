@@ -982,7 +982,7 @@ a {
   }
 
   .site-header {
-    height: 72px;
+    height: calc(72px + env(safe-area-inset-top));
   }
 
   #hero {
