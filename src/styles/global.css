@@ -128,7 +128,7 @@ a {
 }
 
 .site-header.is-scrolled {
-  height: calc(70px + env(safe-area-inset-top));
+  height: calc(70px + var(--safe-top, env(safe-area-inset-top)));
   /* Fully opaque + a gold hairline + shadow so it reads as a distinct bar.
      No backdrop blur — that repaints the full width every scroll frame and
      lags Safari; and the header colour nearly matches the page, so without a
@@ -138,12 +138,27 @@ a {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
+/* Dedicated solid bar over the iOS status-bar / Dynamic Island strip. Sits
+   above the header AND the menu, so page content can never show behind it
+   while scrolling. Its height is measured at runtime (var set in JS) with the
+   CSS safe-area inset as the fallback. */
+.ios-safe-fill {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--safe-top, env(safe-area-inset-top));
+  background: #0b1322;
+  z-index: 3000;
+  pointer-events: none;
+}
+
 /* Extend the bar's fill up behind the notch / Dynamic Island (safe area), and
    on phones keep it solid at every scroll position so page content can never
    show through it or in the status-bar strip above it. */
 .site-header {
-  padding-top: env(safe-area-inset-top);
-  height: calc(84px + env(safe-area-inset-top));
+  padding-top: var(--safe-top, env(safe-area-inset-top));
+  height: calc(84px + var(--safe-top, env(safe-area-inset-top)));
 }
 
 @media (max-width: 979px) {
@@ -346,7 +361,7 @@ a {
   /* Full-bleed background (inset:0 + viewport-fit=cover) covers the notch and
      home-indicator strips; the safe-area insets keep the links/footer clear of
      them. */
-  padding: calc(clamp(104px, 15vh, 132px) + env(safe-area-inset-top))
+  padding: calc(clamp(104px, 15vh, 132px) + var(--safe-top, env(safe-area-inset-top)))
     clamp(30px, 8vw, 52px)
     calc(clamp(36px, 6vh, 56px) + env(safe-area-inset-bottom));
   background:
@@ -982,7 +997,7 @@ a {
   }
 
   .site-header {
-    height: calc(72px + env(safe-area-inset-top));
+    height: calc(72px + var(--safe-top, env(safe-area-inset-top)));
   }
 
   #hero {
