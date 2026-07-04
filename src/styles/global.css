@@ -138,6 +138,30 @@ a {
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
+@media (max-width: 979px) {
+  /* Solid header at every scroll position on phones. */
+  .site-header {
+    background: #0b1322;
+    border-bottom: 1px solid rgba(201, 162, 86, 0.14);
+  }
+
+  /* Non-destructive status-bar cover: a solid block sitting directly ABOVE
+     the header. On iOS Safari, page content renders behind the status bar /
+     Dynamic Island; this block covers that strip. Because it lives above the
+     header (never in the layout flow), it can't push content or create a gap
+     if there is nothing to cover — the excess simply sits off-screen. */
+  .site-header::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 300px;
+    background: #0b1322;
+    pointer-events: none;
+  }
+}
+
 .nav-inner {
   width: var(--container);
   height: 100%;
@@ -323,13 +347,21 @@ a {
 
 .mobile-menu {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Cover the FULL screen height, including behind Safari's bottom toolbar.
+     100vh/100lvh is the large viewport (toolbar retracted), so the panel
+     extends under the toolbar instead of stopping short and letting page
+     content show at the bottom. */
+  height: 100vh;
+  height: 100lvh;
   z-index: 999;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: clamp(104px, 15vh, 132px) clamp(30px, 8vw, 52px)
-    clamp(36px, 6vh, 56px);
+    calc(clamp(36px, 6vh, 56px) + env(safe-area-inset-bottom));
   background:
     radial-gradient(
       circle at 50% 0%,

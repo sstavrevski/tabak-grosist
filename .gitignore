@@ -23,3 +23,6 @@ pnpm-debug.log*
 /playwright/.cache/
 # large source file not used by the build
 assets/North_Macedonia_location_map.svg
+
+# Local Netlify folder
+.netlify
