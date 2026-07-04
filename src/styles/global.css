@@ -1133,6 +1133,22 @@ p {
   -webkit-backdrop-filter: blur(12px);
 }
 
+/* On touch devices backdrop-filter re-blurs the moving content behind these
+   elements on every scroll frame, which causes noticeable scroll lag. Drop it
+   there and lean on a slightly more opaque background instead. */
+@media (hover: none), (max-width: 979px) {
+  .glass-card {
+    background: rgba(22, 32, 57, 0.82);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .menu-toggle {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
 [data-reveal] {
   opacity: 1;
 }

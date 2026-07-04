@@ -187,7 +187,15 @@ if (protectedLogo) {
    ---------------------------------------------------------- */
 const parallaxLayers = document.querySelectorAll<HTMLElement>("[data-parallax]");
 
-if (!prefersReducedMotion && parallaxLayers.length) {
+// Desktop only. Parallax is a subtle mouse/pointer depth effect; on phones it
+// just adds constant main-thread work and makes scrolling feel laggy.
+const parallaxEnabled =
+  !prefersReducedMotion &&
+  parallaxLayers.length > 0 &&
+  window.matchMedia("(min-width: 1024px) and (hover: hover) and (pointer: fine)")
+    .matches;
+
+if (parallaxEnabled) {
   const visibleLayers = new Set<HTMLElement>();
   const parallaxObserver = new IntersectionObserver(
     (entries) => {
@@ -201,7 +209,11 @@ if (!prefersReducedMotion && parallaxLayers.length) {
 
   parallaxLayers.forEach((layer) => parallaxObserver.observe(layer));
 
+  // Recompute only on scroll/resize (rAF-throttled) instead of an endless
+  // requestAnimationFrame loop that burns cycles even when nothing moves.
+  let parallaxQueued = false;
   const updateParallax = () => {
+    parallaxQueued = false;
     visibleLayers.forEach((layer) => {
       const speed = Number(layer.dataset.parallax || 0);
       const parent = layer.parentElement;
@@ -211,8 +223,14 @@ if (!prefersReducedMotion && parallaxLayers.length) {
         (window.innerHeight / 2 - (rect.top + rect.height / 2)) * speed;
       layer.style.transform = `translate3d(0, ${offset}px, 0)`;
     });
+  };
+  const queueParallax = () => {
+    if (parallaxQueued) return;
+    parallaxQueued = true;
     requestAnimationFrame(updateParallax);
   };
+  window.addEventListener("scroll", queueParallax, { passive: true });
+  window.addEventListener("resize", queueParallax, { passive: true });
   updateParallax();
 }
 
@@ -275,26 +293,40 @@ if (!prefersReducedMotion) {
     );
   }
 
-  gsap.utils.toArray<HTMLElement>("[data-timeline]").forEach((item) => {
+  // On the desktop two-column layout odd items sit in the left column and
+  // even items in the right; slide each card in from its own side toward the
+  // centre rail. On the stacked layout everything eases in from the rail side.
+  const timelineIsWide = window.matchMedia("(min-width: 980px)").matches;
+  gsap.utils.toArray<HTMLElement>("[data-timeline]").forEach((item, index) => {
     const card = item.querySelector(".timeline-card");
     const dot = item.querySelector(".timeline-dot");
+    const fromLeftColumn = index % 2 === 0;
+    const dx = timelineIsWide ? (fromLeftColumn ? -46 : 46) : -20;
     const tl = gsap.timeline({
-      scrollTrigger: { trigger: item, start: "top 78%", once: true },
+      scrollTrigger: { trigger: item, start: "top 82%", once: true },
     });
     if (dot) {
+      // Smooth scale-up, no springy overshoot — then it lights up gold.
       tl.from(dot, {
-        scale: 0,
+        scale: 0.2,
         opacity: 0,
-        duration: 0.45,
-        ease: "back.out(2.2)",
+        duration: 0.5,
+        ease: "power2.out",
       });
-      tl.add(() => dot.classList.add("is-reached"), 0.12);
+      tl.add(() => dot.classList.add("is-reached"), 0.28);
     }
     if (card) {
       tl.from(
         card,
-        { opacity: 0, y: 30, duration: 0.7, ease: "power3.out" },
-        0.08,
+        {
+          opacity: 0,
+          x: dx,
+          y: 14,
+          scale: 0.985,
+          duration: 0.9,
+          ease: "power3.out",
+        },
+        0.12,
       );
     }
   });
@@ -374,9 +406,7 @@ if (!prefersReducedMotion) {
   // never fired — reveal it. This can't preempt normal entrance animations
   // (already playing by that point) but guarantees nothing stays invisible,
   // even on fast programmatic jumps.
-  let safetyQueued = false;
   const scrollSafetyNet = () => {
-    safetyQueued = false;
     gsap.utils.toArray<HTMLElement>(revealSelector).forEach((el) => {
       const r = el.getBoundingClientRect();
       // 0.75 is past every reveal trigger's start (they fire by "top 78-88%"),
@@ -388,12 +418,16 @@ if (!prefersReducedMotion) {
       }
     });
   };
+  // Run once shortly AFTER scrolling settles (not during) — the getComputedStyle
+  // reads here force a style recalc, so doing them every scroll frame made
+  // scrolling lag badly on mobile. Debounced, it's imperceptible and still
+  // catches any element whose reveal trigger failed to fire.
+  let safetyTimer: number | undefined;
   window.addEventListener(
     "scroll",
     () => {
-      if (safetyQueued) return;
-      safetyQueued = true;
-      requestAnimationFrame(scrollSafetyNet);
+      window.clearTimeout(safetyTimer);
+      safetyTimer = window.setTimeout(scrollSafetyNet, 180);
     },
     { passive: true },
   );
