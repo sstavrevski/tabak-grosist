@@ -83,6 +83,33 @@ test.describe("navigation", () => {
     expect(sectionTop).toBeGreaterThanOrEqual(headerHeight);
     expect(sectionTop).toBeLessThan(headerHeight + 80);
   });
+
+  test("timeline cards are never horizontally displaced from their columns", async ({
+    page,
+  }) => {
+    // Guards against reveal animations moving the cards with a transform: a
+    // not-yet-triggered card would sit visibly shifted out of its column,
+    // which broke the desktop timeline. Reveals must be opacity-only, so the
+    // horizontal translate of every card must stay 0 — on load AND after
+    // scrolling through the section.
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/");
+
+    const translateX = () =>
+      page.evaluate(() =>
+        [...document.querySelectorAll(".timeline-card")].map(
+          (el) => new DOMMatrixReadOnly(getComputedStyle(el).transform).m41,
+        ),
+      );
+
+    expect((await translateX()).every((x) => Math.abs(x) < 0.5)).toBe(true);
+
+    await page.evaluate(() =>
+      window.scrollTo(0, document.body.scrollHeight * 0.4),
+    );
+    await page.waitForTimeout(1200);
+    expect((await translateX()).every((x) => Math.abs(x) < 0.5)).toBe(true);
+  });
 });
 
 test.describe("mobile menu", () => {

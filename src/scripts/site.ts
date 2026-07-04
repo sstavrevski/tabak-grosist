@@ -293,22 +293,20 @@ if (!prefersReducedMotion) {
     );
   }
 
-  // On the desktop two-column layout odd items sit in the left column and
-  // even items in the right; slide each card in from its own side toward the
-  // centre rail. On the stacked layout everything eases in from the rail side.
-  const timelineIsWide = window.matchMedia("(min-width: 980px)").matches;
-  gsap.utils.toArray<HTMLElement>("[data-timeline]").forEach((item, index) => {
+  // The cards live in a precisely-aligned two-column grid on desktop, so we
+  // must NEVER move them with a transform to reveal them — a not-yet-triggered
+  // card would sit visibly shifted out of its column. A pure opacity fade can
+  // never misposition anything, so the layout is 100% stable every load. The
+  // dot is absolutely positioned, so scaling it in is safe (no layout impact).
+  gsap.utils.toArray<HTMLElement>("[data-timeline]").forEach((item) => {
     const card = item.querySelector(".timeline-card");
     const dot = item.querySelector(".timeline-dot");
-    const fromLeftColumn = index % 2 === 0;
-    const dx = timelineIsWide ? (fromLeftColumn ? -46 : 46) : -20;
     const tl = gsap.timeline({
-      scrollTrigger: { trigger: item, start: "top 82%", once: true },
+      scrollTrigger: { trigger: item, start: "top 84%", once: true },
     });
     if (dot) {
-      // Smooth scale-up, no springy overshoot — then it lights up gold.
       tl.from(dot, {
-        scale: 0.2,
+        scale: 0.5,
         opacity: 0,
         duration: 0.5,
         ease: "power2.out",
@@ -316,18 +314,7 @@ if (!prefersReducedMotion) {
       tl.add(() => dot.classList.add("is-reached"), 0.28);
     }
     if (card) {
-      tl.from(
-        card,
-        {
-          opacity: 0,
-          x: dx,
-          y: 14,
-          scale: 0.985,
-          duration: 0.9,
-          ease: "power3.out",
-        },
-        0.12,
-      );
+      tl.from(card, { opacity: 0, duration: 0.85, ease: "power2.out" }, 0.12);
     }
   });
 
