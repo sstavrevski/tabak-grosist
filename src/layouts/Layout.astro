@@ -22,10 +22,7 @@ const ogImage = new URL(image, Astro.site);
 <html lang="mk">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <!-- Tints the mobile browser chrome (iOS status-bar strip behind the
          Dynamic Island, and the toolbar) to the site's navy so page content
@@ -63,37 +60,6 @@ const ogImage = new URL(image, Astro.site);
     <title>{title}</title>
   </head>
   <body>
-    <!-- Solid bar that physically covers the iOS status-bar / Dynamic Island
-         strip so page content can never show behind it while scrolling.
-         Height is set at runtime from the measured safe-area inset. -->
-    <div class="ios-safe-fill" aria-hidden="true"></div>
-    <script is:inline>
-      (function () {
-        function setSafeTop() {
-          var probe = document.createElement("div");
-          probe.style.cssText =
-            "position:fixed;top:0;left:0;width:0;height:env(safe-area-inset-top);visibility:hidden;pointer-events:none;";
-          document.body.appendChild(probe);
-          var h = probe.getBoundingClientRect().height;
-          probe.remove();
-          // Fallback: some iOS Safari states don't expose the inset (reports 0)
-          // even on notched devices. Detect a tall iOS screen and cover it.
-          var ua = navigator.userAgent;
-          var isIOS =
-            /iP(hone|od|ad)/.test(ua) ||
-            (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-          var s = window.screen || {};
-          var tall = Math.max(s.width || 0, s.height || 0) /
-            Math.max(1, Math.min(s.width || 0, s.height || 0)) > 2;
-          if (h < 1 && isIOS && tall) h = 59;
-          document.documentElement.style.setProperty("--safe-top", h + "px");
-        }
-        setSafeTop();
-        window.addEventListener("orientationchange", function () {
-          setTimeout(setSafeTop, 300);
-        });
-      })();
-    </script>
     <slot />
     <script>
       import "../scripts/site.ts";
