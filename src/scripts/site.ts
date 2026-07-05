@@ -106,6 +106,7 @@ menuToggle?.addEventListener("click", () => {
   else openMenu();
 });
 
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeMenu();
 });
