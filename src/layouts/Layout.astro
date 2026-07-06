@@ -16,6 +16,56 @@ const {
 // Absolute URLs for canonical + social cards (needs `site` in astro.config).
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(image, Astro.site);
+
+// LocalBusiness structured data — tells Google that the domain, the brand
+// "Табак Гросист / Grosist" and the Bitola distribution business are one and
+// the same entity. This is the strongest on-page signal for owning the
+// "Grosist" branded search alongside the Google Business Profile.
+// NOTE: street address + social links are intentionally omitted until the
+// exact values are provided; add `address.streetAddress` and `sameAs` later.
+const siteUrl = Astro.site!.origin;
+const businessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": `${siteUrl}/#business`,
+  name: "Табак Гросист",
+  alternateName: ["Grosist", "Гросист", "Табак Гросист ДООЕЛ Битола"],
+  description:
+    "Дистрибутивна компанија со седиште во Битола и над 35 години искуство. Дистрибуција до продажните објекти во југо-западна Македонија.",
+  url: siteUrl,
+  telephone: "+389 78 640 000",
+  foundingDate: "1991",
+  image: new URL("/og.png", Astro.site).href,
+  logo: new URL("/favicon-192.png", Astro.site).href,
+  priceRange: "$$",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Битола",
+    addressRegion: "Пелагонија",
+    addressCountry: "MK",
+  },
+  geo: {
+    "@type": "GeoCoordinates",
+    latitude: 41.0297,
+    longitude: 21.3292,
+  },
+  areaServed: [
+    "Битола",
+    "Ресен",
+    "Прилеп",
+    "Крушево",
+    "Охрид",
+    "Струга",
+    "Кичево",
+    "Дебар",
+  ].map((name) => ({ "@type": "City", name })),
+  openingHoursSpecification: {
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    opens: "07:00",
+    closes: "15:00",
+  },
+};
 ---
 
 <!doctype html>
@@ -77,6 +127,11 @@ const ogImage = new URL(image, Astro.site);
       rel="stylesheet"
     />
     <title>{title}</title>
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(businessSchema)}
+    />
   </head>
   <body>
     <div id="shell">
