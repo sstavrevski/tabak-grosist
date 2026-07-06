@@ -24,10 +24,6 @@ const ogImage = new URL(image, Astro.site);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-    <!-- Tints the mobile browser chrome (iOS status-bar strip behind the
-         Dynamic Island, and the toolbar) to the site's navy so page content
-         never bleeds through the top strip and the chrome matches the site. -->
-    <meta name="theme-color" content="#0b1322" />
     <link rel="canonical" href={canonical} />
 
     <!-- Open Graph (Facebook, Viber, WhatsApp, LinkedIn) -->
@@ -66,7 +62,9 @@ const ogImage = new URL(image, Astro.site);
     <title>{title}</title>
   </head>
   <body>
-    <slot />
+    <div id="shell">
+      <slot />
+    </div>
     <script>
       import "../scripts/site.ts";
     </script>

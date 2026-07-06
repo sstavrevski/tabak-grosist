@@ -105,7 +105,9 @@ test.describe("navigation", () => {
     expect((await translateX()).every((x) => Math.abs(x) < 0.5)).toBe(true);
 
     await page.evaluate(() =>
-      window.scrollTo(0, document.body.scrollHeight * 0.4),
+      document
+        .getElementById("shell")!
+        .scrollTo(0, document.getElementById("shell")!.scrollHeight * 0.4),
     );
     await page.waitForTimeout(1200);
     expect((await translateX()).every((x) => Math.abs(x) < 0.5)).toBe(true);
@@ -130,7 +132,10 @@ test.describe("mobile menu", () => {
     await expect(page.locator(".mobile-menu")).not.toHaveClass(/is-open/);
     // The eased scroll animation takes a few hundred ms to settle.
     await expect
-      .poll(() => page.evaluate(() => window.scrollY), { timeout: 3000 })
+      .poll(
+        () => page.evaluate(() => document.getElementById("shell")!.scrollTop),
+        { timeout: 3000 },
+      )
       .toBeGreaterThan(200);
   });
 

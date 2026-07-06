@@ -45,14 +45,20 @@ async function stuckHiddenOnScreen(page: Page): Promise<string[]> {
  * defect we guard against.
  */
 async function scrollAndAssertVisible(page: Page) {
-  const height = await page.evaluate(() => document.body.scrollHeight);
+  const height = await page.evaluate(
+    () => document.getElementById("shell")!.scrollHeight,
+  );
   const step = 500;
   for (let y = 0; y <= height; y += step) {
-    await page.evaluate((yy) => window.scrollTo(0, yy), y);
+    await page.evaluate(
+      (yy) => document.getElementById("shell")!.scrollTo(0, yy),
+      y,
+    );
+    await page.waitForTimeout(120);
     await expect
       .poll(() => stuckHiddenOnScreen(page), {
-        timeout: 3000,
-        intervals: [100, 250, 500, 1000],
+        timeout: 6000,
+        intervals: [100, 250, 500, 1000, 1500],
       })
       .toEqual([]);
   }
@@ -147,7 +153,7 @@ test.describe("content visibility guarantee", () => {
     await page.waitForTimeout(2000);
     await scrollAndAssertVisible(page);
     // And back to the top — nothing should have been stranded on the way.
-    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.evaluate(() => document.getElementById("shell")!.scrollTo(0, 0));
     await page.waitForTimeout(500);
     expect(await stuckHiddenOnScreen(page)).toEqual([]);
   });

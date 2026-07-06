@@ -7,6 +7,11 @@ const prefersReducedMotion = window.matchMedia(
 
 gsap.registerPlugin(ScrollTrigger);
 
+// The page scrolls inside #shell, not the window, so everything scroll-related
+// must watch the shell. ScrollTrigger uses it as the scroller too.
+const shell = document.getElementById("shell") as HTMLElement;
+ScrollTrigger.defaults({ scroller: shell });
+
 /* Custom eased smooth-scroll — consistent on every browser (Safari's native
    smooth scroll is janky), with an offset so sections clear the fixed header. */
 const scrollToTarget = (target: Element) => {
@@ -16,7 +21,7 @@ const scrollToTarget = (target: Element) => {
   const headerOffset = 70;
   const gap = 32;
   const anchor = target.querySelector(".section-inner") ?? target;
-  const startY = window.scrollY;
+  const startY = shell.scrollTop;
   const destY = Math.max(
     0,
     startY + anchor.getBoundingClientRect().top - headerOffset - gap,
@@ -24,7 +29,7 @@ const scrollToTarget = (target: Element) => {
   const distance = destY - startY;
 
   if (prefersReducedMotion || Math.abs(distance) < 2) {
-    window.scrollTo(0, destY);
+    shell.scrollTo(0, destY);
     return;
   }
 
@@ -37,7 +42,7 @@ const scrollToTarget = (target: Element) => {
   const step = (now: number) => {
     if (startTime === null) startTime = now;
     const progress = Math.min(1, (now - startTime) / duration);
-    window.scrollTo(0, startY + distance * easeOutCubic(progress));
+    shell.scrollTo(0, startY + distance * easeOutCubic(progress));
     if (progress < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
@@ -64,7 +69,7 @@ const lockSpy = () => {
 };
 
 const onScroll = () => {
-  header?.classList.toggle("is-scrolled", window.scrollY > 24);
+  header?.classList.toggle("is-scrolled", shell.scrollTop > 24);
   // Release the lock shortly after the smooth scroll settles (no scroll events).
   if (spyLock) {
     window.clearTimeout(spyReleaseTimer);
@@ -75,7 +80,7 @@ const onScroll = () => {
   }
 };
 
-window.addEventListener("scroll", onScroll, { passive: true });
+shell.addEventListener("scroll", onScroll, { passive: true });
 onScroll();
 
 /* ----------------------------------------------------------
@@ -168,7 +173,7 @@ if (spySections.length && "IntersectionObserver" in window) {
         .filter((entry) => entry.isIntersecting)
         .forEach((entry) => setActiveSection(entry.target.id));
     },
-    { rootMargin: "-45% 0px -50% 0px", threshold: 0 },
+    { root: shell, rootMargin: "-45% 0px -50% 0px", threshold: 0 },
   );
   spySections.forEach((section) => spyObserver.observe(section));
 }
@@ -205,7 +210,7 @@ if (parallaxEnabled) {
         else visibleLayers.delete(entry.target as HTMLElement);
       });
     },
-    { rootMargin: "20% 0px 20% 0px" },
+    { root: shell, rootMargin: "20% 0px 20% 0px" },
   );
 
   parallaxLayers.forEach((layer) => parallaxObserver.observe(layer));
@@ -230,7 +235,7 @@ if (parallaxEnabled) {
     parallaxQueued = true;
     requestAnimationFrame(updateParallax);
   };
-  window.addEventListener("scroll", queueParallax, { passive: true });
+  shell.addEventListener("scroll", queueParallax, { passive: true });
   window.addEventListener("resize", queueParallax, { passive: true });
   updateParallax();
 }
@@ -411,7 +416,7 @@ if (!prefersReducedMotion) {
   // scrolling lag badly on mobile. Debounced, it's imperceptible and still
   // catches any element whose reveal trigger failed to fire.
   let safetyTimer: number | undefined;
-  window.addEventListener(
+  shell.addEventListener(
     "scroll",
     () => {
       window.clearTimeout(safetyTimer);

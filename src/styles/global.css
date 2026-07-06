@@ -41,18 +41,37 @@
 /* ============================================================
    Base
    ============================================================ */
+/* The page scrolls inside #shell (a fixed, viewport-clamped container) rather
+   than the body. On iOS Safari this keeps ALL content within the visual
+   viewport — it can never render behind the Dynamic Island / status bar or the
+   bottom toolbar — so those strips show the solid navy html/body background. */
 html {
-  /* Smooth scrolling is handled by a custom eased animation in JS for
-     consistent behaviour across browsers (Safari's native smooth scroll is
-     janky and would double up with programmatic scrolls). */
   scroll-behavior: auto;
-  background: var(--color-bg-primary);
+  background: #0b1322;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
   margin: 0;
   min-width: 320px;
+  height: 100%;
+  overflow: hidden;
   color: var(--color-ink);
+  background: #0b1322;
+  font-family: var(--font-sans);
+  line-height: 1.7;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+#shell {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: clip;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
   background:
     radial-gradient(
       circle at 78% 12%,
@@ -60,14 +79,9 @@ body {
       transparent 28rem
     ),
     linear-gradient(180deg, #0b1323 0%, var(--color-bg-primary) 38%, #0a1020 100%);
-  font-family: var(--font-sans);
-  line-height: 1.7;
-  overflow-x: clip;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
 }
 
-body.menu-open {
+body.menu-open #shell {
   overflow: hidden;
 }
 
