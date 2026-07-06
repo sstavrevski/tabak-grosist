@@ -7,10 +7,17 @@ const prefersReducedMotion = window.matchMedia(
 
 gsap.registerPlugin(ScrollTrigger);
 
-// The page scrolls inside #shell, not the window, so everything scroll-related
-// must watch the shell. ScrollTrigger uses it as the scroller too.
+// On iOS Safari the page scrolls inside #shell (the app-shell fix); on every
+// other browser it scrolls the window exactly as before. Everything
+// scroll-related routes through these helpers so behaviour is identical to the
+// original everywhere except iOS Safari.
+const iosSafari = document.documentElement.classList.contains("ios-safari");
 const shell = document.getElementById("shell") as HTMLElement;
-ScrollTrigger.defaults({ scroller: shell });
+const scrollEventTarget: EventTarget = iosSafari ? shell : window;
+const getScrollTop = () => (iosSafari ? shell.scrollTop : window.scrollY);
+const scrollToY = (y: number) =>
+  iosSafari ? shell.scrollTo(0, y) : window.scrollTo(0, y);
+if (iosSafari) ScrollTrigger.defaults({ scroller: shell });
 
 /* Custom eased smooth-scroll — consistent on every browser (Safari's native
    smooth scroll is janky), with an offset so sections clear the fixed header. */
@@ -21,7 +28,7 @@ const scrollToTarget = (target: Element) => {
   const headerOffset = 70;
   const gap = 32;
   const anchor = target.querySelector(".section-inner") ?? target;
-  const startY = shell.scrollTop;
+  const startY = getScrollTop();
   const destY = Math.max(
     0,
     startY + anchor.getBoundingClientRect().top - headerOffset - gap,
@@ -29,7 +36,7 @@ const scrollToTarget = (target: Element) => {
   const distance = destY - startY;
 
   if (prefersReducedMotion || Math.abs(distance) < 2) {
-    shell.scrollTo(0, destY);
+    scrollToY(destY);
     return;
   }
 
@@ -42,7 +49,7 @@ const scrollToTarget = (target: Element) => {
   const step = (now: number) => {
     if (startTime === null) startTime = now;
     const progress = Math.min(1, (now - startTime) / duration);
-    shell.scrollTo(0, startY + distance * easeOutCubic(progress));
+    scrollToY(startY + distance * easeOutCubic(progress));
     if (progress < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
@@ -69,7 +76,7 @@ const lockSpy = () => {
 };
 
 const onScroll = () => {
-  header?.classList.toggle("is-scrolled", shell.scrollTop > 24);
+  header?.classList.toggle("is-scrolled", getScrollTop() > 24);
   // Release the lock shortly after the smooth scroll settles (no scroll events).
   if (spyLock) {
     window.clearTimeout(spyReleaseTimer);
@@ -80,7 +87,7 @@ const onScroll = () => {
   }
 };
 
-shell.addEventListener("scroll", onScroll, { passive: true });
+scrollEventTarget.addEventListener("scroll", onScroll, { passive: true });
 onScroll();
 
 /* ----------------------------------------------------------
@@ -173,7 +180,11 @@ if (spySections.length && "IntersectionObserver" in window) {
         .filter((entry) => entry.isIntersecting)
         .forEach((entry) => setActiveSection(entry.target.id));
     },
-    { root: shell, rootMargin: "-45% 0px -50% 0px", threshold: 0 },
+    {
+      root: iosSafari ? shell : null,
+      rootMargin: "-45% 0px -50% 0px",
+      threshold: 0,
+    },
   );
   spySections.forEach((section) => spyObserver.observe(section));
 }
@@ -210,7 +221,7 @@ if (parallaxEnabled) {
         else visibleLayers.delete(entry.target as HTMLElement);
       });
     },
-    { root: shell, rootMargin: "20% 0px 20% 0px" },
+    { root: iosSafari ? shell : null, rootMargin: "20% 0px 20% 0px" },
   );
 
   parallaxLayers.forEach((layer) => parallaxObserver.observe(layer));
@@ -235,7 +246,7 @@ if (parallaxEnabled) {
     parallaxQueued = true;
     requestAnimationFrame(updateParallax);
   };
-  shell.addEventListener("scroll", queueParallax, { passive: true });
+  scrollEventTarget.addEventListener("scroll", queueParallax, { passive: true });
   window.addEventListener("resize", queueParallax, { passive: true });
   updateParallax();
 }
@@ -416,7 +427,7 @@ if (!prefersReducedMotion) {
   // scrolling lag badly on mobile. Debounced, it's imperceptible and still
   // catches any element whose reveal trigger failed to fire.
   let safetyTimer: number | undefined;
-  shell.addEventListener(
+  scrollEventTarget.addEventListener(
     "scroll",
     () => {
       window.clearTimeout(safetyTimer);

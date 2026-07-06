@@ -41,31 +41,52 @@
 /* ============================================================
    Base
    ============================================================ */
-/* The page scrolls inside #shell (a fixed, viewport-clamped container) rather
-   than the body. On iOS Safari this keeps ALL content within the visual
-   viewport — it can never render behind the Dynamic Island / status bar or the
-   bottom toolbar — so those strips show the solid navy html/body background. */
 html {
   scroll-behavior: auto;
-  background: #0b1322;
-  height: 100%;
-  overflow: hidden;
+  background: var(--color-bg-primary);
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  height: 100%;
-  overflow: hidden;
   color: var(--color-ink);
-  background: #0b1322;
+  background:
+    radial-gradient(
+      circle at 78% 12%,
+      rgba(201, 162, 86, 0.14),
+      transparent 28rem
+    ),
+    linear-gradient(180deg, #0b1323 0%, var(--color-bg-primary) 38%, #0a1020 100%);
   font-family: var(--font-sans);
   line-height: 1.7;
+  overflow-x: clip;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
+body.menu-open {
+  overflow: hidden;
+}
+
+/* Everywhere except iOS Safari the wrapper is invisible — the body scrolls
+   exactly as before. */
 #shell {
+  display: contents;
+}
+
+/* iOS Safari ONLY: the page scrolls inside #shell (a fixed, viewport-clamped
+   container) so content can never render behind the Dynamic Island / status
+   bar or the bottom toolbar — those strips show the solid navy background.
+   Every other browser is completely unaffected. */
+html.ios-safari,
+html.ios-safari body {
+  height: 100%;
+  overflow: hidden;
+  background: #0b1322;
+}
+
+html.ios-safari #shell {
+  display: block;
   position: fixed;
   inset: 0;
   overflow-y: auto;
@@ -81,7 +102,7 @@ body {
     linear-gradient(180deg, #0b1323 0%, var(--color-bg-primary) 38%, #0a1020 100%);
 }
 
-body.menu-open #shell {
+html.ios-safari body.menu-open #shell {
   overflow: hidden;
 }
 
