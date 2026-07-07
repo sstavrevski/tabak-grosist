@@ -143,8 +143,37 @@ document.querySelectorAll<HTMLAnchorElement>('a[href*="#"]').forEach((link) => {
     lockSpy();
     setActiveSection(hash.slice(1));
     scrollToTarget(target);
+    cleanHash();
   });
 });
+
+/* Keep the URL clean: after scrolling to a section we drop the "#section"
+   fragment so the address bar stays at the bare page URL (e.g. returning to
+   the homepage never leaves a lingering "/#contact"). */
+function cleanHash() {
+  if (window.location.hash) {
+    history.replaceState(
+      null,
+      "",
+      window.location.pathname + window.location.search,
+    );
+  }
+}
+
+/* Arriving with a hash — e.g. tapping "Контакт" in the footer of a legal page
+   links to "/#contact". Smooth-scroll to the section with the correct header
+   offset, then strip the hash so it doesn't linger in the URL. */
+if (window.location.hash.length > 1) {
+  const target = document.querySelector(window.location.hash);
+  if (target) {
+    requestAnimationFrame(() => {
+      lockSpy();
+      setActiveSection(window.location.hash.slice(1));
+      scrollToTarget(target);
+      cleanHash();
+    });
+  }
+}
 
 /* ----------------------------------------------------------
    Scroll-spy — highlight the nav link for the section in view
